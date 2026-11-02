@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prime Motors — Админ-панель</title>
+<style>
+  :root{
+    --graphite:#212E38; --ink:#212E38; --steel:#79818A; --steel-2:#566069;
+    --page:#E4E5DF; --mist:#EFF0EB; --white:#FFFFFF; --line:#D3D4CD; --line-2:#C7C8C0;
+    --red:#B73A18; --red-press:#962F12; --red-tint:#FBEDE8;
+    --ok:#1f7a44; --ok-bg:#e4f3ea; --ok-bd:#bfe3cc;
+    --warn:#b04a24; --warn-bg:#fdf0e6; --warn-bd:#f0cdb3;
+    --info:#2b4a63; --info-bg:#e9eff4; --info-bd:#cdd9e3;
+    --side:#1b262e;
+    --ff:'Noto Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--ff);background:var(--page);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;min-height:100vh}
+  a{color:inherit}
+  h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:-.01em}
+  button{font-family:var(--ff)}
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+  /* ===== Sidebar ===== */
+  .side{width:244px;flex-shrink:0;background:var(--side);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .side-brand{display:flex;align-items:center;gap:10px;padding:20px 20px 18px;font-weight:800;font-size:19px}
+  .side-brand .pm-mark{width:26px;height:26px;color:#fff;flex-shrink:0}
+  .side-tag{font-size:11px;color:#8b93a0;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:0 20px 14px}
+  .side nav{flex:1;overflow:auto;padding:4px 12px}
+  .side .ng{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#6f7884;font-weight:700;padding:14px 8px 7px}
+  .side nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;color:#c4cbd4;text-decoration:none;font-weight:600;font-size:13.5px;cursor:pointer;transition:.13s}
+  .side nav a svg{width:18px;height:18px;flex-shrink:0;opacity:.85}
+  .side nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+  .side nav a.on{background:var(--red);color:#fff}
+  .side nav a.on svg{opacity:1}
+  .side nav a .cnt{margin-left:auto;background:rgba(255,255,255,.14);color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px}
+  .side nav a.on .cnt{background:rgba(255,255,255,.22)}
+  .side-user{border-top:1px solid rgba(255,255,255,.08);padding:14px 16px;display:flex;align-items:center;gap:10px}
+  .side-user .av{width:34px;height:34px;border-radius:9px;background:#2e3d49;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff}
+  .side-user .nm{font-size:13px;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side-user .rl{font-size:11px;color:#8b93a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ===== Main ===== */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(228,229,223,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:14px 26px}
+  .topbar h1{font-size:20px}
+  .topbar .sub{color:var(--steel-2);font-size:12.5px;margin-top:1px}
+  .topbar .sp{flex:1}
+  .tb-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;width:240px;color:var(--steel-2)}
+  .tb-search input{border:0;outline:0;background:none;font-family:var(--ff);font-size:13px;width:100%;color:var(--ink)}
+  .wrap{padding:24px 26px 40px;max-width:1240px;width:100%}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:9px 15px 10px;font-weight:700;font-size:13.5px;cursor:pointer;transition:.13s;text-decoration:none;white-space:nowrap}
+  .btn:hover{border-color:var(--line-2);background:var(--mist)}
+  .btn svg{width:16px;height:16px}
+  .btn-red{background:var(--red);border-color:var(--red);color:#fff}
+  .btn-red:hover{background:var(--red-press);border-color:var(--red-press)}
+  .btn-dark{background:var(--graphite);border-color:var(--graphite);color:#fff}
+  .btn-dark:hover{background:#2c3b47;border-color:#2c3b47}
+  .btn-sm{padding:6px 11px 7px;font-size:12.5px;border-radius:8px}
+  .rowacts{display:inline-flex;align-items:center;gap:8px}
+  .btn-link{padding:6px 8px 7px;color:var(--info);border-color:var(--info-bd);background:var(--info-bg)}
+  .btn-link:hover{background:var(--info);border-color:var(--info);color:#fff}
+  .btn-link svg{display:block}
+  .btn-ic{padding:7px;border-radius:8px}
+  .btn-ic svg{width:16px;height:16px;display:block}
+
+  .view{display:none}
+  .view.on{display:block}
+
+  .vh-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .vh-head .ttl{font-size:19px;font-weight:800}
+  .vh-head .lnk{display:inline-flex;align-items:center;gap:6px;background:var(--red-tint);color:var(--red);border:1px solid #efd3ca;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700}
+  .vh-head .lnk svg{width:13px;height:13px}
+  .vh-head .sp{flex:1}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:18px}
+  .card h3{font-size:15px;margin-bottom:14px}
+  .card .ch{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .card .ch h3{margin:0}
+  .card .ch .sp{flex:1}
+  .muted{color:var(--steel-2)}
+  .hint{color:var(--steel-2);font-size:12.5px}
+
+  /* stat tiles */
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .tiles-3{grid-template-columns:repeat(3,1fr)}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .tile .n{font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .tile .l{color:var(--steel-2);font-size:12.5px;margin-top:2px}
+  #pmAccr{font-size:20px;white-space:nowrap}
+  .tile .d{font-size:11.5px;font-weight:700;margin-top:8px;display:inline-flex;align-items:center;gap:4px}
+  .tile .d.up{color:var(--ok)} .tile .d.dn{color:var(--red)}
+  .tile.dark{background:var(--graphite);border-color:var(--graphite)}
+  .tile.dark .n{color:#fff}.tile.dark .l{color:#9aa0a8}
+
+  /* table */
+  .scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .empty{padding:36px 16px;text-align:center;color:var(--steel)}
+  .empty svg{width:32px;height:32px;color:var(--line-2);margin-bottom:10px}
+  .empty .t{font-weight:700;color:var(--steel-2);font-size:14px}
+  .empty .s{font-size:12.5px;margin-top:4px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.5}
+  .tbl{width:100%;border-collapse:collapse}
+  .tbl th{text-align:left;font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--steel-2);font-weight:700;padding:0 12px 10px}
+  .tbl td{padding:12px;border-top:1px solid var(--line);vertical-align:middle;font-size:13.5px}
+  .tbl tr:hover td{background:var(--mist)}
+  .tbl .r{text-align:right} .tbl .c{text-align:center}
+  .tbl td.r{white-space:nowrap}
+  .thumb{width:52px;height:38px;border-radius:7px;object-fit:cover;background:linear-gradient(135deg,#cdd2cc,#e7e8e2);display:inline-flex;align-items:center;justify-content:center;color:#9aa29a;flex-shrink:0}
+  .carcell{display:flex;align-items:center;gap:11px}
+  .carcell b{font-weight:700} .carcell .s{font-size:12px;color:var(--steel-2)}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--mist);color:var(--steel-2);white-space:nowrap}
+  .badge.g{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+  .badge.o{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-bd)}
+  .badge.b{background:var(--info-bg);color:var(--info);border-color:var(--info-bd)}
+  .badge.dot::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+
+  .flag{font-size:14px}
+
+  /* forms */
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--steel-2);margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-family:var(--ff);font-size:13.5px;color:var(--ink);background:#fff;outline:0}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--steel)}
+  .field textarea{min-height:84px;resize:vertical}
+  .field select,select.field{-webkit-appearance:none;-moz-appearance:none;appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23566069' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;background-size:12px 8px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+  .seg{display:inline-flex;background:var(--mist);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+  .seg button{border:0;background:none;padding:8px 16px;border-radius:7px;font-weight:700;font-size:13px;color:var(--steel-2);cursor:pointer;transition:.13s}
+  .seg button.on{background:var(--graphite);color:#fff}
+
+  /* tag chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .tagchip{display:inline-flex;align-items:center;gap:7px;background:var(--mist);border:1px solid var(--line);border-radius:999px;padding:6px 7px 6px 12px;font-size:12.5px;font-weight:600}
+  .tagchip.plain,.tagchip:not(:has(button)){padding:6px 14px;gap:0}
+  .tagchip button{border:0;background:none;color:var(--steel);cursor:pointer;width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
+  .tagchip button:hover{background:#dfe0d9;color:var(--red)}
+  .tagchip.chip-input{padding:3px 5px}
+  .tagchip.chip-input input{border:0;background:none;outline:0;font-family:var(--ff);font-size:12.5px;font-weight:600;color:var(--ink);width:118px;padding:3px 6px}
+  select.block-pick{border:1px solid var(--line-2);border-radius:999px;padding:6px 26px 6px 12px;font-family:var(--ff);font-size:12.5px;font-weight:600;background:#fff;color:var(--ink);cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23566069' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+  input.block-newinput{border:1px solid var(--line-2);border-radius:999px;padding:6px 12px;font-family:var(--ff);font-size:12.5px;font-weight:600;color:var(--ink);outline:0;width:140px}
+
+  /* photo grid in editor */
+  .phgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .ph{position:relative;aspect-ratio:4/3;border-radius:10px;background:linear-gradient(135deg,#cdd2cc,#e7e8e2);border:1px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#9aa29a}
+  .ph .main-tag{position:absolute;left:6px;top:6px;background:var(--graphite);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+  .ph .x{position:absolute;right:5px;top:5px;width:20px;height:20px;border-radius:5px;background:rgba(0,0,0,.5);color:#fff;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .ph-add{border:1.5px dashed var(--line-2);background:var(--mist);cursor:pointer;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--steel-2)}
+  .ph-add:hover{border-color:var(--steel);color:var(--steel-2);background:#e9eae4}
+
+  /* modal / drawer */
+  .modal{position:fixed;inset:0;z-index:60;display:none}
+  .modal[open]{display:block}
+  .modal .ov{position:absolute;inset:0;background:rgba(18,22,26,.5)}
+  .drawer{position:absolute;right:0;top:0;height:100%;width:100%;max-width:620px;background:var(--page);box-shadow:-14px 0 40px rgba(0,0,0,.18);display:flex;flex-direction:column;animation:sl .22s ease}
+  @keyframes sl{from{transform:translateX(30px);opacity:.6}to{transform:none;opacity:1}}
+  .drawer-h{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line);background:#fff}
+  .drawer-h h2{font-size:17px}
+  .drawer-h .sp{flex:1}
+  .drawer-b{flex:1;overflow:auto;padding:22px}
+  .drawer-f{display:flex;gap:10px;padding:16px 22px;border-top:1px solid var(--line);background:#fff}
+  .drawer-f .sp{flex:1}
+  .modal.center .box{position:relative;max-width:460px;margin:8vh auto 0;background:#fff;border-radius:14px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:pp .18s ease}
+  @keyframes pp{from{transform:scale(.97);opacity:.7}to{transform:none;opacity:1}}
+
+  /* amo rows */
+  .maprow{display:grid;grid-template-columns:1fr 24px 1fr;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+  .maprow:first-of-type{border-top:0}
+  .maprow .ar{color:var(--steel);display:flex;justify-content:center}
+  .pill{display:inline-flex;align-items:center;gap:7px;background:var(--mist);border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:13px;font-weight:600;width:100%}
+  .pill.amo{background:#eef4ff;border-color:#d4e0f5;color:#2b4a7a}
+  /* ===== Вход по коду ===== */
+  .gate{position:fixed;inset:0;z-index:200;background:var(--side);display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
+  .gate.hide{display:none}
+  .gate-card{width:100%;max-width:380px;background:var(--white);border-radius:18px;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+  .gate-brand{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:21px;color:var(--ink)}
+  .gate-brand .pm-mark{width:30px;height:30px;color:var(--red)}
+  .gate-tag{text-align:center;color:var(--steel);font-size:13px;margin:7px 0 26px}
+  .gate-field label{display:block;font-size:12.5px;font-weight:700;color:var(--steel-2);margin-bottom:7px}
+  .gate-field input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:17px;font-family:var(--ff);letter-spacing:.06em;text-align:center;text-transform:uppercase}
+  .gate-field input::placeholder{text-transform:none;letter-spacing:.02em;color:#b7bcc2}
+  .gate-field input:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px var(--red-tint)}
+  .gate-btn{width:100%;margin-top:16px;padding:14px;border:0;border-radius:11px;background:var(--red);color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+  .gate-btn:hover{background:var(--red-press)}
+  .gate-err{min-height:18px;margin-top:11px;text-align:center;color:var(--red);font-size:13px;font-weight:600}
+  .gate-hint{margin-top:16px;text-align:center;color:var(--steel);font-size:11.5px;line-height:1.55}
+  .gate-shake{animation:gshake .35s}
+  @keyframes gshake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .su-out{margin-left:auto;background:none;border:0;color:#8b93a0;cursor:pointer;padding:6px;border-radius:8px;display:flex;flex-shrink:0}
+  .su-out:hover{background:rgba(255,255,255,.08);color:#fff}
+  .acc-form{display:grid;grid-template-columns:1.4fr 1fr 1.3fr;gap:14px}
+  .acc-code-row{display:flex;gap:8px}
+  .acc-code-row input{flex:1;min-width:0}
+  .codepill{display:inline-flex;align-items:center;gap:8px;background:var(--mist);border:1px solid var(--line);border-radius:7px;padding:4px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:12.5px;letter-spacing:.02em}
+  .codepill button{border:0;background:none;cursor:pointer;color:var(--steel);display:flex;padding:0}
+  .codepill button:hover{color:var(--red)}
+  .logline{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+  .logline:first-child{border-top:0}
+  .logline .t{color:var(--steel);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .dotok{width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0}
+  .doter{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0}
+
+  .kv{display:grid;grid-template-columns:200px 1fr;gap:10px 16px;font-size:13.5px}
+  .kv .k{color:var(--steel-2);font-weight:600}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);background:var(--graphite);color:#fff;padding:12px 20px;border-radius:11px;font-size:13.5px;font-weight:600;box-shadow:0 12px 34px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s;z-index:90}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  .tier{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .tbox{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--mist);text-align:center}
+  .tbox.on{background:var(--graphite);border-color:var(--graphite);color:#fff}
+  .tbox .tt{font-size:12px;color:var(--steel-2)} .tbox.on .tt{color:#aeb6bf}
+  .tbox .tv{font-size:17px;font-weight:800;margin-top:4px}
+
+  .conn{display:flex;align-items:center;gap:10px;background:var(--ok-bg);border:1px solid var(--ok-bd);color:var(--ok);border-radius:11px;padding:12px 16px;font-weight:700;font-size:13.5px}
+
+  /* reels (вертикальные видео, формат как на сайте) */
+  .reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(174px,1fr));gap:16px}
+  .rcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:.15s}
+  .rcard:hover{border-color:var(--line-2);box-shadow:0 10px 26px rgba(0,0,0,.08)}
+  .rvid{position:relative;aspect-ratio:9/16;background:linear-gradient(160deg,#2a3842,#161e26);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .rvid .sil{width:52%;color:#3c4a55;opacity:.6}
+  .rtag{position:absolute;top:9px;left:9px;background:rgba(0,0,0,.5);color:#fff;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:999px}
+  .rdur{position:absolute;top:9px;right:9px;background:rgba(0,0,0,.58);color:#fff;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;font-variant-numeric:tabular-nums}
+  .rplay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+  .rplay svg{width:20px;height:20px;margin-left:2px}
+  .rvid .rst{position:absolute;left:9px;bottom:9px}
+  .rfoot{padding:11px 13px}
+  .rfoot b{font-size:13px;font-weight:700;line-height:1.3;display:block}
+  .rfoot .rm{color:var(--steel-2);font-size:11.5px;margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .rfoot .rm .d{width:3px;height:3px;border-radius:50%;background:var(--line-2)}
+  .rfoot .ra{display:flex;align-items:center;gap:8px;margin-top:10px}
+  .rfoot .ra .sp{flex:1}
+  .deliv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:16px}
+  .dcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:.15s}
+  .dcard:hover{border-color:var(--line-2);box-shadow:0 10px 26px rgba(0,0,0,.08)}
+  .dimg{position:relative;aspect-ratio:4/3;background:linear-gradient(135deg,#d2d6d0,#e7e8e2);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#aeb2aa}
+  .dimg .x{position:absolute;right:8px;top:8px;width:24px;height:24px;border-radius:7px;background:rgba(0,0,0,.5);color:#fff;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1}
+  .dimg .x:hover{background:rgba(0,0,0,.72)}
+  .dfoot{padding:11px 13px;font-size:12.5px;color:var(--steel-2);font-weight:600;cursor:text}
+  .dfoot:hover{color:var(--ink)}
+  .dfoot input{border:1px solid var(--line-2);border-radius:7px;padding:5px 8px;font-family:var(--ff);font-size:12.5px;font-weight:600;color:var(--ink);outline:0;width:100%}
+  .flt-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .side-scrim{display:none;position:fixed;inset:0;background:rgba(18,22,26,.42);z-index:45}
+  @media(max-width:1080px){
+    .tiles{grid-template-columns:repeat(2,1fr)}
+    .tier{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:860px){
+    .side{position:fixed;left:0;top:0;z-index:50;transform:translateX(-100%);transition:.2s}
+    .side.open~.side-scrim{display:block}
+    .card .ch{flex-wrap:wrap}
+    .flt-grid{grid-template-columns:1fr}
+    .wrap{padding:18px 16px 34px}
+    .topbar{padding:12px 16px}
+    .topbar h1{font-size:18px}
+    .side.open{transform:none}
+    .main{width:100%}
+    .burger{display:inline-flex!important}
+    .tb-search{display:none}
+    .phgrid{grid-template-columns:repeat(3,1fr)}
+    .row2,.row3{grid-template-columns:1fr}
+    .kv{grid-template-columns:1fr}
+    .acc-form{grid-template-columns:1fr}
+    .maprow{grid-template-columns:1fr;gap:9px;padding:14px;border-top:0;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+    .maprow:last-child{margin-bottom:0}
+    .maprow .ar{transform:rotate(90deg);justify-content:center}
+    .scroll-x{overflow-x:auto}
+    .scroll-x .tbl{min-width:640px}
+  }
+  @media(max-width:560px){
+    .tiles{grid-template-columns:1fr 1fr}
+    .tiles-3{grid-template-columns:1fr}
+    .tile .n{white-space:nowrap}
+    .seg button{padding:8px 12px;font-size:12.5px}
+    .modal.center .box{margin:5vh 12px 0;padding:20px;max-width:none}
+    .drawer-b{padding:16px}
+    .drawer-h,.drawer-f{padding:14px 16px}
+    .drawer-f{flex-direction:column;align-items:stretch;gap:8px}
+    .drawer-f .sp{display:none}
+    .drawer-f .btn{width:100%}
+    .box>div:has(.sp){flex-wrap:wrap;gap:8px}
+    .box>div:has(.sp) .sp{display:none}
+    .box>div:has(.sp) .btn{flex:1 1 40%}
+    .tile .n{font-size:22px}
+    .vh-head .ttl{font-size:18px}
+    .phgrid{grid-template-columns:repeat(2,1fr)}
+    .wrap .sp{display:none}
+    .topbar{gap:10px}
+    .topbar > div:first-of-type{flex:1;min-width:0}
+    .topbar h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .topbar .sp{display:none}
+    .topbar .btn{flex-shrink:0}
+    .vh-head{flex-direction:column;align-items:stretch;gap:10px}
+    .vh-head .lnk{align-self:flex-start}
+    .vh-head .btn,.vh-head button{width:100%;justify-content:center}
+    .seg{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}
+    .seg::-webkit-scrollbar{display:none}
+    .seg button{flex-shrink:0}
+  }
+  .burger{display:none;align-items:center;justify-content:center;width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+
+<aside class="side" id="side">
+  <div class="side-brand">
+    <svg class="pm-mark" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M 4,50 A46,46 0 1,0 96,50 A46,46 0 1,0 4,50 Z M 50,16.5 L -7.58,74.89 L 2.5,83.34 Z M 50,16.5 L 10.75,88.49 L 22.76,93.84 Z M 50,16.5 L 32.11,96.53 L 45.14,98.36 Z M 50,16.5 L 54.86,98.36 L 67.89,96.53 Z M 50,16.5 L 77.24,93.84 L 89.25,88.49 Z M 50,16.5 L 97.5,83.34 L 107.58,74.89 Z"/></svg>
+    <span>Prime Motors</span>
+  </div>
+  <div class="side-tag">Админ-панель</div>
+  <nav aria-label="Разделы">
+    <div class="ng">Обзор</div>
+    <a data-view="dash" class="on"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h7V4H4v9zm0 7h7v-5H4v5zm9 0h7v-9h-7v9zm0-16v5h7V4h-7z" fill="currentColor"/></svg> Дашборд</a>
+    <a data-view="leads"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H7l-3 3V5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 9h8M8 12h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Заявки <span class="cnt" id="cntLeads">0</span></a>
+    <div class="ng">Сайт</div>
+    <a data-view="cars"><svg viewBox="0 0 24 24" fill="none"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11m-14 0h14m-14 0a2 2 0 00-2 2v3h2m14-5a2 2 0 012 2v3h-2M7 16h10M7 16v2H5v-2m2 0H5m12 0h2v2h-2v-2m0 0H7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Автомобили <span class="cnt" id="cntCars">0</span></a>
+    <a data-view="filters"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Категории и фильтры</a>
+    <a data-view="video"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M10 9.5l5 2.5-5 2.5v-5z" fill="currentColor"/></svg> Видеообзоры <span class="cnt" id="cntVid">0</span></a>
+    <a data-view="delivery"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3 15l4-4 3 3 4-4 7 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="9" r="1.4" fill="currentColor"/></svg> Выдачи</a>
+    <div class="ng">Партнерка</div>
+    <a data-view="partners"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5M16 11a3 3 0 100-6M20.5 19c0-2.4-1.6-4.2-3.9-4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Партнеры <span class="cnt" id="cntPrt">0</span></a>
+    <a data-view="payouts"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2.5" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg> Выплаты <span class="cnt" id="cntPay">0</span></a>
+    <a data-view="amo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/></svg> Интеграция amoCRM</a>
+    <div class="ng">Прочее</div>
+    <a data-view="access"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Доступы</a>
+    <a data-view="settings"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M19 12a7 7 0 00-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 00-2-1.2l-.4-2.5H9.8l-.4 2.5a7 7 0 00-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 005 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 002 1.2l.4 2.5h3.4l.4-2.5a7 7 0 002-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Настройки</a>
+  </nav>
+  <div class="side-user">
+    <div class="av" id="suAv">КВ</div>
+    <div style="flex:1;min-width:0"><div class="nm" id="suName">Константин В.</div><div class="rl" id="suRole">Владелец</div></div>
+    <button class="su-out" id="logout" title="Выйти" aria-label="Выйти"><svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+</aside>
+<div class="side-scrim" id="sideScrim"></div>
+
+<div class="main">
+  <header class="topbar">
+    <button class="burger" id="burger" aria-label="Меню"><svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <div>
+      <h1 id="pgTitle">Дашборд</h1>
+    </div>
+    <div class="sp"></div>
+    <div class="tb-search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><input placeholder="Поиск по авто, партнерам"></div>
+    <a class="btn" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none"><path d="M14 4h6v6M20 4l-8 8M10 5H5a1 1 0 00-1 1v13a1 1 0 001 1h13a1 1 0 001-1v-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> На сайт</a>
+  </header>
+
+  <div class="wrap">
+
+    <!-- ============ ДАШБОРД ============ -->
+    <section class="view on" data-v="dash">
+      <div class="tiles">
+        <div class="tile"><div class="n">0</div><div class="l">Авто в каталоге</div></div>
+        <div class="tile"><div class="n">0</div><div class="l">Активных партнеров</div></div>
+        <div class="tile"><div class="n">0</div><div class="l">Лидов за месяц</div></div>
+        <div class="tile dark"><div class="n">0 ₽</div><div class="l">К выплате партнерам</div></div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="card">
+          <div class="ch"><h3>Последние лиды</h3><div class="sp"></div><span class="badge b dot">синхронизация amoCRM</span><a class="btn btn-sm" data-goto="leads">Все заявки</a></div>
+          <div class="scroll-x"><table class="tbl">
+            <thead><tr><th>Клиент</th><th>Авто</th><th>Источник</th><th>Партнер</th><th>Статус</th></tr></thead>
+            <tbody>
+              <tr><td colspan="5"><div class="empty"><div class="t">Лидов пока нет</div><div class="s">Заявки с сайта появятся здесь после подключения amoCRM.</div></div></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ЗАЯВКИ ============ -->
+    <section class="view" data-v="leads">
+      <div class="vh-head">
+        <div class="ttl">Заявки</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Формы сайта и реферальные ссылки, синхронизация с amoCRM</span>
+        <div class="sp"></div>
+        <button class="btn" data-export-leads><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Экспорт</button>
+      </div>
+      <p class="hint" style="margin:-6px 0 18px">Каждая заявка с сайта (каталог, форма «Цена под ключ», карточка авто, реферальная ссылка, видеообзор) создает сделку в amoCRM и попадает сюда.</p>
+      <div class="tiles">
+        <div class="tile"><div class="n">0</div><div class="l">Новых за сегодня</div></div>
+        <div class="tile"><div class="n">0</div><div class="l">В работе</div></div>
+        <div class="tile"><div class="n">0</div><div class="l">Всего за месяц</div></div>
+        <div class="tile dark"><div class="n">—</div><div class="l">Конверсия в сделку</div></div>
+      </div>
+      <div class="card" style="padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="seg" id="leadSeg"><button class="on" data-lf="all">Все</button><button data-lf="new">Новые</button><button data-lf="work">В работе</button><button data-lf="done">Выдан</button></div>
+          <div class="sp" style="flex:1"></div><span class="hint">нет синхронизации</span>
+        </div>
+      </div>
+      <div class="card" style="padding:8px 10px">
+        <div class="scroll-x"><table class="tbl">
+          <thead><tr><th>Клиент</th><th>Телефон</th><th>Источник</th><th>Авто</th><th>Партнер</th><th>Время</th><th>Этап</th><th class="r"></th></tr></thead>
+          <tbody id="leadRows"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ АВТОМОБИЛИ ============ -->
+    <section class="view" data-v="cars">
+      <div class="vh-head">
+        <div class="ttl">Автомобили</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Каталог и карточка авто на сайте</span>
+        <div class="sp"></div>
+        <button class="btn" data-export-cars><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Экспорт</button>
+        <button class="btn btn-red" data-car-new><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Добавить авто</button>
+      </div>
+
+      <div class="card" style="padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="seg" id="carSeg"><button class="on" data-cf="all">Все</button><button data-cf="new">Новые</button><button data-cf="used">С пробегом</button><button data-cf="draft">Черновики</button></div>
+          <select class="field" style="margin:0;width:auto" id="fltCountry"></select>
+          <select class="field" style="margin:0;width:auto"><option>Блок: все</option><option>Новые</option><option>С пробегом</option><option>Электромобили</option></select>
+          <div class="sp" style="flex:1"></div>
+          <span class="hint">0 авто</span>
+        </div>
+      </div>
+
+      <div class="card" style="padding:8px 10px">
+        <div class="scroll-x"><table class="tbl">
+          <thead><tr><th>Авто</th><th>Страна</th><th>Категория</th><th>Состояние</th><th class="r">Цена</th><th>Статус</th><th class="r">Действия</th></tr></thead>
+          <tbody id="carRows"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ КАТЕГОРИИ И ФИЛЬТРЫ ============ -->
+    <section class="view" data-v="filters">
+      <div class="vh-head">
+        <div class="ttl">Категории и фильтры</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Фильтры каталога и витрины на главной</span>
+      </div>
+      <p class="hint" style="margin:-6px 0 18px">Эти справочники управляют фильтрами в каталоге и блоками-витринами на главной странице сайта. Поля авто выбираются только из значений ниже, поэтому фильтры на сайте всегда совпадают с данными.</p>
+
+      <div class="flt-grid">
+        <div class="card">
+          <div class="ch"><h3>Страны</h3><div class="sp"></div><button class="btn btn-sm" data-add-chip="cntry">Добавить</button></div>
+          <div class="chips" id="cntry"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Состояние</h3></div>
+          <div class="chips"><span class="tagchip plain">Новые</span><span class="tagchip plain">С пробегом</span></div>
+          <p class="hint" style="margin-top:12px">Базовый переключатель каталога. Отражается в сегменте «Все / Новые / С пробегом».</p>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Марки</h3><div class="sp"></div><button class="btn btn-sm" data-add-chip="brand">Добавить</button></div>
+          <div class="chips" id="brand"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Типы кузова</h3><div class="sp"></div><button class="btn btn-sm" data-add-chip="body">Добавить</button></div>
+          <div class="chips" id="body"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><h3>Блоки первого экрана</h3></div>
+        <p class="hint" style="margin:-4px 0 14px">Крупные блоки на первом экране сайта. «Новые» и «С пробегом» собираются по состоянию авто, «Электромобили» по категории, «Видеообзоры» ведет в ленту роликов.</p>
+        <div class="scroll-x"><table class="tbl" id="blocksTable">
+          <thead><tr><th>Блок</th><th>Что показывает</th><th class="c">Авто</th><th class="c">На главной</th><th class="r"></th></tr></thead>
+          <tbody>
+            <tr><td><b>Новые</b></td><td class="muted">каталог, состояние = Новые</td><td class="c">0</td><td class="c"><span class="badge g dot">да</span></td><td class="r"><button class="btn btn-sm" data-block-edit>Изменить</button></td></tr>
+            <tr><td><b>С пробегом</b></td><td class="muted">каталог, состояние = С пробегом</td><td class="c">0</td><td class="c"><span class="badge g dot">да</span></td><td class="r"><button class="btn btn-sm" data-block-edit>Изменить</button></td></tr>
+            <tr><td><b>Электромобили</b></td><td class="muted">каталог, категория = Электромобили</td><td class="c">0</td><td class="c"><span class="badge g dot">да</span></td><td class="r"><button class="btn btn-sm" data-block-edit>Изменить</button></td></tr>
+            <tr><td><b>Видеообзоры</b></td><td class="muted">ведет в раздел роликов</td><td class="c">0 видео</td><td class="c"><span class="badge g dot">да</span></td><td class="r"><button class="btn btn-sm" data-goto="video">Открыть</button></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+    </section>
+
+    <!-- ============ ВИДЕООБЗОРЫ ============ -->
+    <section class="view" data-v="video">
+      <div class="vh-head">
+        <div class="ttl">Видеообзоры</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Лента обзоров на сайте</span>
+        <div class="sp"></div>
+        <button class="btn btn-red" data-vid-new><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Загрузить видео</button>
+      </div>
+      <p class="hint" style="margin:-6px 0 18px">Вертикальные ролики 9:16 примерно на минуту. Снимаем сами, храним на своем сервере. Публикуются в ленту обзоров на сайте и в карточку привязанного авто.</p>
+      <div class="card" style="padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="seg" id="vidSeg"><button class="on" data-vf="all">Все</button><button data-vf="draft">Черновики</button></div>
+          <div class="sp" style="flex:1"></div><span class="hint">0 роликов</span>
+        </div>
+      </div>
+      <div class="reels">
+        <div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M10 9.5l5 2.5-5 2.5v-5z" fill="currentColor"/></svg><div class="t">Видеообзоров пока нет</div><div class="s">Нажмите «Загрузить видео», чтобы добавить первый ролик.</div></div>
+      </div>
+    </section>
+    <!-- ============ ВЫДАЧИ ============ -->
+    <section class="view" data-v="delivery">
+      <div class="vh-head">
+        <div class="ttl">Выдачи</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Общие выдачи на страницах авто</span>
+        <div class="sp"></div>
+        <button class="btn btn-red" data-deliv-upload><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Загрузить фото</button>
+      </div>
+      <p class="hint" style="margin:-6px 0 18px">Общая галерея выдач. Показывается на странице авто, если у конкретной машины не загружены свои фото выдачи.</p>
+      <div class="deliv-grid" id="delivGrid">
+        <div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="10" r="1.5" fill="currentColor"/><path d="M4 17l5-4 3 2 4-3 4 3" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><div class="t">Фото выдач пока нет</div><div class="s">Нажмите «Загрузить фото», чтобы добавить общие фото выдач.</div></div>
+      </div>
+    </section>
+
+
+    <!-- ============ ПАРТНЕРЫ ============ -->
+    <section class="view" data-v="partners">
+      <div class="vh-head">
+        <div class="ttl">Партнеры</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Личный кабинет партнера и ссылки /r/</span>
+        <div class="sp"></div>
+        <button class="btn btn-red" data-toast="Приглашение отправлено (демо)"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Пригласить</button>
+      </div>
+      <div class="card" style="padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="seg" id="partSeg"><button class="on" data-pf="all">Все</button><button data-pf="person">Физлица</button><button data-pf="company">Юрлица</button><button data-pf="check">На проверке</button></div>
+          <div class="sp" style="flex:1"></div><span class="hint">0 партнеров</span>
+        </div>
+      </div>
+      <div class="card" style="padding:8px 10px">
+        <div class="scroll-x"><table class="tbl">
+          <thead><tr><th>Партнер</th><th>Тип</th><th>Ссылка</th><th class="c">Лиды</th><th class="c">Сделки</th><th class="r">Начислено</th><th>Статус</th><th class="r"></th></tr></thead>
+          <tbody>
+            <tr><td colspan="8"><div class="empty"><div class="t">Партнеров пока нет</div><div class="s">Приглашайте партнеров кнопкой «Пригласить» — они появятся здесь с реферальными ссылками /r/.</div></div></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="card" id="partcond">
+        <div class="ch"><h3>Уровни и условия</h3><div class="sp"></div><span class="badge b dot">применяется к начислениям и кабинету</span></div>
+        <div class="row2">
+          <div>
+            <h4 style="font-size:13px;margin-bottom:10px">Физлица, фикс 30 000 ₽</h4>
+            <div class="tbox on" style="text-align:left"><div class="tt" style="color:#aeb6bf">За каждого клиента со сделкой</div><div class="tv">30 000 ₽ фикс</div></div>
+            <p class="hint" style="margin-top:10px">Без уровней. Выплата на карту после проверки документов.</p>
+          </div>
+          <div>
+            <h4 style="font-size:13px;margin-bottom:10px">Юрлица, лесенка по сделкам за 90 дней</h4>
+            <div class="tier">
+              <div class="tbox"><div class="tt">1 сделка</div><div class="tv">30 000 ₽</div></div>
+              <div class="tbox"><div class="tt">2–3</div><div class="tv">35 000 ₽</div></div>
+              <div class="tbox on"><div class="tt">4–5</div><div class="tv">40 000 ₽</div></div>
+              <div class="tbox"><div class="tt">6+</div><div class="tv">50 000 ₽</div></div>
+            </div>
+            <p class="hint" style="margin-top:10px">Выплата на расчетный счет. Уровень пересчитывается автоматически.</p>
+          </div>
+        </div>
+        <div class="field" style="margin-top:16px;max-width:360px">
+          <label>Окно закрепления клиента за партнером</label>
+          <select><option>45 дней</option><option>60 дней</option><option selected>90 дней</option><option>120 дней</option></select>
+        </div>
+        <button class="btn btn-red" data-toast="Условия сохранены (демо)">Сохранить условия</button>
+      </div>
+    </section>
+
+    <!-- ============ ВЫПЛАТЫ ============ -->
+    <section class="view" data-v="payouts">
+      <div class="vh-head">
+        <div class="ttl">Выплаты</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Кнопка «Запросить вывод» в кабинете</span>
+      </div>
+      <div class="tiles tiles-3">
+        <div class="tile"><div class="n">0 ₽</div><div class="l">В очереди на выплату</div></div>
+        <div class="tile"><div class="n">0 ₽</div><div class="l">Выплачено за месяц</div></div>
+        <div class="tile"><div class="n">0</div><div class="l">Заявок ожидают</div></div>
+      </div>
+      <div class="card" style="padding:8px 10px">
+        <div class="scroll-x"><table class="tbl">
+          <thead><tr><th>Партнер</th><th>Тип</th><th>Телефон</th><th>Реквизиты</th><th class="r">Сумма</th><th>Статус</th><th class="r">Действие</th></tr></thead>
+          <tbody>
+            <tr><td colspan="7"><div class="empty"><div class="t">Заявок на выплату нет</div><div class="s">Запросы на вывод из кабинетов партнеров появятся здесь.</div></div></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ AMOCRM ============ -->
+    <section class="view" data-v="amo">
+      <div class="vh-head">
+        <div class="ttl">Интеграция amoCRM</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Формы сайта и статусы кабинетов</span>
+      </div>
+      <p class="hint" style="margin:-6px 0 18px">Все заявки с сайта и переходы по реферальным ссылкам попадают в amoCRM и в раздел «Заявки» этой панели. Статусы сделок возвращаются обратно в кабинеты партнеров и в карточку клиента.</p>
+
+      <div class="card">
+        <div class="ch"><h3>Подключение</h3><div class="sp"></div><span class="conn"><span class="dotok"></span> Активно</span></div>
+        <div class="kv">
+          <div class="k">Поддомен аккаунта</div><div>primemotors.amocrm.ru</div>
+          <div class="k">Интеграция</div><div>Prime Motors Site, OAuth 2.0</div>
+          <div class="k">Последняя синхронизация</div><div>—</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn btn-dark" data-toast="Соединение с amoCRM в порядке">Проверить соединение</button>
+          <button class="btn" data-toast="Токен обновлен (демо)">Обновить токен</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><h3>Воронка и этапы</h3><div class="sp"></div><span class="badge">Воронка «Импорт авто»</span></div>
+        <p class="hint" style="margin:-4px 0 14px">Этап сделки в amoCRM слева, статус в кабинете партнера и клиента справа. Статусы синхронизируются в обе стороны.</p>
+        <div class="maprow"><span class="pill amo">Первичный контакт</span><span class="ar">→</span><span class="pill">Новый лид</span></div>
+        <div class="maprow"><span class="pill amo">Квалификация</span><span class="ar">→</span><span class="pill">Квалифицирован</span></div>
+        <div class="maprow"><span class="pill amo">Встреча / подбор</span><span class="ar">→</span><span class="pill">Подбор, встреча</span></div>
+        <div class="maprow"><span class="pill amo">Договор и оплата</span><span class="ar">→</span><span class="pill">Договор</span></div>
+        <div class="maprow"><span class="pill amo">Доставка</span><span class="ar">→</span><span class="pill">В пути</span></div>
+        <div class="maprow"><span class="pill amo">Выдан / успех</span><span class="ar">→</span><span class="pill">Выдан, вознаграждение</span></div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><h3>Поля сделки</h3><div class="sp"></div></div>
+        <p class="hint" style="margin:-4px 0 14px">Что сайт передает в карточку сделки amoCRM.</p>
+        <div class="maprow"><span class="pill">Реферальный код (из /r/CODE)</span><span class="ar">→</span><span class="pill amo">Партнер, поле «ref_code»</span></div>
+        <div class="maprow"><span class="pill">Тип партнера</span><span class="ar">→</span><span class="pill amo">«Физлицо / Юрлицо»</span></div>
+        <div class="maprow"><span class="pill">Интересующее авто</span><span class="ar">→</span><span class="pill amo">«Авто интереса»</span></div>
+        <div class="maprow"><span class="pill">UTM-метки и источник</span><span class="ar">→</span><span class="pill amo">utm_source, utm_campaign</span></div>
+        <div class="maprow"><span class="pill">Телефон и имя</span><span class="ar">→</span><span class="pill amo">Контакт сделки</span></div>
+      </div>
+
+      <div class="row2">
+        <div class="card">
+          <div class="ch"><h3>Правила атрибуции</h3></div>
+          <div class="kv">
+            <div class="k">Окно закрепления</div><div>90 дней с первого перехода</div>
+            <div class="k">Приоритет</div><div>первый реферальный переход</div>
+            <div class="k">Повторная заявка</div><div>закрепляется за тем же партнером</div>
+            <div class="k">Дубль в работе</div><div>вознаграждение не начисляется, пометка в сделке</div>
+            <div class="k">Начисление</div><div>на этапе «Выдан / успех»</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Журнал обмена</h3><div class="sp"></div><button class="btn btn-sm" data-toast="Журнал обновлен">Обновить</button></div>
+          <div class="logline"><span class="dotok"></span> <div style="flex:1">Лид создан, ref=BIZ4821, авто BMW X5</div><span class="t">13:04</span></div>
+          <div class="logline"><span class="dotok"></span> <div style="flex:1">Сделка 3024 — этап «Выдан», начислено 40 000 ₽</div><span class="t">12:51</span></div>
+          <div class="logline"><span class="dotok"></span> <div style="flex:1">Статус «В пути» отправлен в кабинет клиента</div><span class="t">11:30</span></div>
+          <div class="logline"><span class="doter"></span> <div style="flex:1">Дубль: клиент уже в работе, без начисления</div><span class="t">10:12</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ДОСТУПЫ ============ -->
+    <section class="view" data-v="access">
+      <div class="vh-head">
+        <div class="ttl">Доступы</div>
+        <span class="lnk"><svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Вход в панель только по персональному коду, без логина</span>
+        <div class="sp"></div>
+        <button class="btn btn-red" data-access-add><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Выдать доступ</button>
+      </div>
+
+      <div class="card" id="accAddCard" style="padding:16px" hidden>
+        <div class="ch"><h3 style="font-size:14px">Новый доступ</h3></div>
+        <div class="acc-form">
+          <div class="field"><label>ФИО</label><input id="accName" placeholder="Иванов Иван Иванович" autocomplete="off"></div>
+          <div class="field"><label>Роль</label><select id="accRole"><option>Менеджер</option><option>Администратор</option><option>Наблюдатель</option><option>Владелец</option></select></div>
+          <div class="field"><label>Код доступа</label><div class="acc-code-row"><input id="accCode" readonly placeholder="нажмите Сгенерировать"><button class="btn btn-sm" type="button" data-access-gen>Сгенерировать</button></div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn btn-red" data-access-save>Создать доступ</button>
+          <button class="btn" data-access-cancel>Отмена</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><h3>Выданные доступы</h3><div class="sp"></div><span class="badge" id="accCount">1 активный</span></div>
+        <div class="scroll-x"><table class="tbl">
+          <thead><tr><th>ФИО</th><th>Код доступа</th><th>Роль</th><th class="r">Действие</th></tr></thead>
+          <tbody id="accRows"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ НАСТРОЙКИ ============ -->
+    <section class="view" data-v="settings">
+      <div class="vh-head"><div class="ttl">Настройки</div></div>
+      <div class="row2">
+        <div class="card">
+          <div class="ch"><h3>Правовая информация</h3></div>
+          <div class="field"><label>Юридическое лицо (в подвале и договорах)</label><input value="ИП Волков Константин Геннадьевич"></div>
+          <div class="field"><label>Подпись в подвале</label><input value="© 2026 Prime Motors"></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Контакты</h3></div>
+          <div class="row2"><div class="field"><label>Телефон</label><input value="+7 (342) 000-00-00"></div><div class="field"><label>Email</label><input value="info@primemotors.ru"></div></div>
+          <div class="field"><label>Город</label><input value="Пермь"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><h3>Соцсети и каналы</h3></div>
+        <div class="row3">
+          <div class="field"><label>Telegram</label><input value="t.me/volkov_auto"></div>
+          <div class="field"><label>YouTube</label><input value="youtube.com/@volkov_auto"></div>
+          <div class="field"><label>Instagram</label><input value="instagram.com/volkov_auto"></div>
+          <div class="field"><label>TikTok</label><input value="tiktok.com/@volkov.auto"></div>
+          <div class="field"><label>VKontakte</label><input value="vk.com/volkovauto"></div>
+          <div class="field"><label>Дзен</label><input value="dzen.ru/volkov_auto"></div>
+        </div>
+        <button class="btn btn-red" data-toast="Настройки сохранены (демо)">Сохранить</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ===== Редактор авто ===== -->
+<div class="modal" id="carModal">
+  <div class="ov" data-close></div>
+  <div class="drawer">
+    <div class="drawer-h">
+      <h2 id="carModalTitle">Новое авто</h2>
+      <div class="sp"></div>
+      <button class="btn-ic btn" data-close aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="drawer-b">
+      <div class="card" style="margin:0 0 16px">
+        <div class="ch"><h3 style="font-size:14px">Фотографии</h3><div class="sp"></div><span class="hint">первая — обложка в каталоге</span></div>
+        <div class="phgrid" id="phGrid">
+          <div class="ph"><span class="main-tag">обложка</span><button class="x" data-ph-x aria-label="Удалить">×</button></div>
+          <div class="ph"><button class="x" data-ph-x aria-label="Удалить">×</button></div>
+          <div class="ph"><button class="x" data-ph-x aria-label="Удалить">×</button></div>
+          <div class="ph ph-add" data-ph-add><svg viewBox="0 0 24 24" width="20" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Добавить</div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field"><label>Марка</label><input id="fBrand" list="brandList" placeholder="BMW" autocomplete="off"><datalist id="brandList"></datalist></div>
+        <div class="field"><label>Модель</label><input placeholder="X5 xDrive40i"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Год</label><input placeholder="2024"></div>
+        <div class="field"><label>Цена, ₽</label><input placeholder="8 900 000"></div>
+        <div class="field"><label>Пробег, км</label><input placeholder="0"></div>
+      </div>
+      <div class="row3">
+        <div class="field"><label>Страна</label><select id="fCountry"></select></div>
+        <div class="field"><label>Состояние</label><select><option>Новое</option><option>С пробегом</option></select></div>
+        <div class="field"><label>Тип кузова</label><select id="fBody"></select></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Двигатель</label><input placeholder="3.0 бензин, 340 л.с."></div>
+        <div class="field"><label>Привод и КПП</label><input placeholder="Полный, автомат"></div>
+      </div>
+      <div class="field">
+        <label>Блоки на главной</label>
+        <div class="chips">
+          <span class="tagchip">Электромобили <button aria-label="Убрать">×</button></span>
+          <button class="btn btn-sm" data-block-add style="border-style:dashed">+ Блок</button>
+        </div>
+        <p class="hint" style="margin-top:8px">Блоки «Новые» и «С пробегом» подставляются автоматически по полю «Состояние».</p>
+      </div>
+      <div class="field"><label>Описание (карточка авто на сайте)</label><textarea placeholder="Комплектация, состояние, что входит в цену под ключ: подбор, проверка, доставка, растаможка, выдача."></textarea></div>
+      <div class="field" style="max-width:260px"><label>Статус публикации</label><select><option>Опубликовать</option><option>Черновик</option></select></div>
+      <div class="card" style="margin:16px 0 0">
+        <div class="ch"><h3 style="font-size:14px">Фото выдачи этого авто</h3></div>
+        <p class="hint" style="margin:-4px 0 12px">Пусто — на сайте покажутся общие выдачи Prime Motors.</p>
+        <div class="phgrid">
+          <div class="ph"><button class="x" data-ph-x aria-label="Удалить">×</button></div>
+          <div class="ph"><button class="x" data-ph-x aria-label="Удалить">×</button></div>
+          <div class="ph ph-add" data-ph-add><svg viewBox="0 0 24 24" width="20" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Добавить</div>
+        </div>
+      </div>
+      <div class="card" style="margin:16px 0 0">
+        <div class="ch"><h3 style="font-size:14px">Видеообзоры этого авто</h3><div class="sp"></div><button class="btn btn-sm" data-vid-link>Привязать видео</button></div>
+        <p class="hint" style="margin:-4px 0 12px">Пусто — на сайте покажется общая лента обзоров.</p>
+        <div class="chips" id="fVideos">
+          <span class="tagchip">Обзор Lixiang L7 <button data-rm aria-label="Убрать">×</button></span>
+          <span class="tagchip">Выдача Lixiang L7 <button data-rm aria-label="Убрать">×</button></span>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-f">
+      <button class="btn" data-close>Отмена</button>
+      <div class="sp"></div>
+      <button class="btn btn-dark" data-toast="Сохранено как черновик (демо)">В черновик</button>
+      <button class="btn btn-red" data-close-save>Опубликовать на сайт</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Добавить видео ===== -->
+<div class="modal center" id="vidModal">
+  <div class="ov" data-close></div>
+  <div class="box">
+    <div class="ch"><h3>Новый видеообзор</h3><div class="sp"></div><button class="btn-ic btn" data-close aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+    <p class="hint" style="margin:-4px 0 14px">Вертикальный ролик 9:16, примерно до минуты. Загружается на наш сервер.</p>
+    <div style="display:flex;gap:16px">
+      <div style="flex-shrink:0;width:118px">
+        <div class="rvid" style="border-radius:12px;border:1.5px dashed var(--line-2);cursor:pointer" data-vid-file>
+          <div style="text-align:center;color:#8f9aa4"><svg viewBox="0 0 24 24" width="22" fill="none" style="margin-bottom:4px"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div style="font-size:11px">Видео 9:16</div></div>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div class="field" style="margin-bottom:12px"><label>Длительность</label><input placeholder="0:58"></div>
+        <div class="field" style="margin-bottom:0"><label>Обложка (необязательно)</label><div class="ph ph-add" style="aspect-ratio:16/5;border-radius:10px" data-ph-pick><svg viewBox="0 0 24 24" width="16" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Загрузить кадр</div></div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px"><label>Заголовок</label><input placeholder="Toyota Land Cruiser 300 из Японии"></div>
+    <div class="field"><label>Привязать к авто</label><select><option>Не привязывать</option><option>Toyota Land Cruiser 300</option><option>BMW X5</option><option>Zeekr 001</option></select></div>
+    <div style="display:flex;gap:10px;margin-top:6px"><button class="btn" data-close>Отмена</button><div class="sp" style="flex:1"></div><button class="btn btn-dark" data-toast="Сохранено как черновик (демо)">В черновик</button><button class="btn btn-red" data-close-save>Опубликовать</button></div>
+  </div>
+</div>
+
+<div class="modal center" id="partModal">
+  <div class="ov" data-close></div>
+  <div class="box">
+    <div class="ch"><h3 id="pmName">Партнер</h3></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:-4px 0 14px"><span class="badge" id="pmType"></span><span class="badge dot" id="pmStatus"></span><span class="muted" id="pmSub" style="font-size:12.5px"></span></div>
+    <div class="field"><label>Реферальная ссылка</label><div class="pill" style="justify-content:space-between"><span id="pmLinkText">/r/</span><button class="btn btn-sm" data-copy="#pmLinkText">Копировать</button></div></div>
+    <div class="tiles" style="grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:0"><div class="tile"><div class="n" id="pmLeads">0</div><div class="l">Лиды</div></div><div class="tile"><div class="n" id="pmDeals">0</div><div class="l">Сделки</div></div><div class="tile"><div class="n" id="pmAccr">0</div><div class="l">Начислено</div></div></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" data-close>Закрыть</button><div class="sp" style="flex:1"></div><button class="btn btn-dark" data-toast="Сообщение отправлено (демо)">Написать</button><button class="btn btn-red" data-toast="Выплата создана (демо)">Создать выплату</button></div>
+  </div>
+</div>
+
+<div class="modal center" id="leadModal">
+  <div class="ov" data-close></div>
+  <div class="box">
+    <div class="ch"><h3 id="lmName">Заявка</h3></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:-4px 0 14px"><span class="badge" id="lmSource"></span><span class="badge dot" id="lmStage"></span><span class="muted" id="lmTime" style="font-size:12.5px"></span></div>
+    <div class="kv">
+      <div class="k">Телефон</div><div id="lmPhone"></div>
+      <div class="k">Авто интереса</div><div id="lmCar"></div>
+      <div class="k">Партнер</div><div id="lmPartner"></div>
+      <div class="k">Ссылка клиенту</div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0"><span id="lmTrack" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;word-break:break-all;color:var(--info)"></span><button class="btn btn-sm" data-copy="#lmTrack">Копировать</button></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap"><button class="btn" data-close>Закрыть</button><div class="sp" style="flex:1"></div><button class="btn btn-dark" data-toast="Открыто в amoCRM (демо)">Открыть в amoCRM</button><button class="btn btn-red" data-toast="Передано в работу (демо)">В работу</button></div>
+  </div>
+</div>
+
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Вход в панель">
+  <div class="gate-card">
+    <div class="gate-brand"><svg class="pm-mark" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M 4,50 A46,46 0 1,0 96,50 A46,46 0 1,0 4,50 Z M 50,16.5 L -7.58,74.89 L 2.5,83.34 Z M 50,16.5 L 10.75,88.49 L 22.76,93.84 Z M 50,16.5 L 32.11,96.53 L 45.14,98.36 Z M 50,16.5 L 54.86,98.36 L 67.89,96.53 Z M 50,16.5 L 77.24,93.84 L 89.25,88.49 Z M 50,16.5 L 97.5,83.34 L 107.58,74.89 Z"/></svg><span>Prime Motors</span></div>
+    <div class="gate-tag">Панель управления</div>
+    <div class="gate-field"><label for="gateCode">Код доступа</label><input id="gateCode" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="Введите код"></div>
+    <button class="gate-btn" id="gateBtn">Войти</button>
+    <div class="gate-err" id="gateErr"></div>
+    <div class="gate-hint">Доступ только по персональному коду.<br>Логин и пароль не требуются.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s);};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+
+  // --- demo car data (поля 1:1 с карточкой на сайте) ---
+  var cars=[];
+  var flagMap={"Китай":"🇨🇳","Корея":"🇰🇷","Япония":"🇯🇵","Европа":"🇪🇺"};
+  function carRow(c){
+    var cond=c[4]==='new'?'<span class="badge b dot">Новое</span>':'<span class="badge dot">С пробегом</span>';
+    var st=c[6]==='pub'?'<span class="badge g dot">опубликован</span>':'<span class="badge o dot">черновик</span>';
+    return '<tr data-cond="'+c[4]+'" data-pub="'+c[6]+'"><td><div class="carcell"><span class="thumb"><svg viewBox="0 0 24 24" width="16" fill="none"><path d="M5 11l1.5-4A2 2 0 018.4 6h7.2a2 2 0 011.9 1.2L19 11M5 11h14M6 11v3m12-3v3" stroke="#9aa29a" stroke-width="1.5" stroke-linecap="round"/></svg></span>'
+      +'<div><b>'+c[0]+'</b><div class="s">'+c[1]+'</div></div></div></td>'
+      +'<td><span class="flag">'+(flagMap[c[2]]||'')+'</span> '+c[2]+'</td>'
+      +'<td class="muted">'+c[3]+'</td><td>'+cond+'</td><td class="r"><b>'+c[5]+'</b></td><td>'+st+'</td>'
+      +'<td class="r"><button class="btn btn-sm" data-car-edit="'+c[0]+'">Изменить</button></td></tr>';
+  }
+  var LEADS=[];
+  var STAGECLS={"Новый лид":"b","Квалификация":"o","Встреча":"o","Договор":"g","В пути":"b","Выдан":"g"};
+  function leadRow(l){ var cls=STAGECLS[l[6]]||''; var pr=l[4]&&l[4]!=='—'?l[4]:'<span class="muted">—</span>';
+    return '<tr data-g="'+l[7]+'"><td><b>'+l[0]+'</b></td><td class="muted">'+l[1]+'</td><td><span class="badge">'+l[2]+'</span></td><td class="muted">'+l[3]+'</td><td class="muted">'+pr+'</td><td class="muted">'+l[5]+'</td><td><span class="badge '+cls+' dot">'+l[6]+'</span></td><td class="r"><div class="rowacts"><button class="btn btn-sm btn-link" data-lead-link="primemotors.ru/track/'+lmTok(l[0]+'|'+l[1])+'" title="Копировать ссылку для клиента" aria-label="Копировать ссылку для клиента"><svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M9 15l6-6M10.5 6.5l1.4-1.4a3.5 3.5 0 015 5l-2.2 2.2M13.5 17.5l-1.4 1.4a3.5 3.5 0 01-5-5l2.2-2.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><button class="btn btn-sm" data-lead-open>Открыть</button></div></td></tr>'; }
+  var _lr=$('#leadRows'); if(_lr)_lr.innerHTML=LEADS.length?LEADS.map(leadRow).join(''):'<tr><td colspan="8"><div class="empty"><div class="t">Заявок пока нет</div><div class="s">Обращения с сайта появятся здесь после подключения amoCRM.</div></div></td></tr>';
+
+  // --- доступы (вход по коду) ---
+  var ACCESS=[
+    {name:"Волков Константин Геннадьевич",code:"590024",role:"Владелец"}
+  ];
+  var PERMS={
+    "Владелец":["dash","leads","cars","filters","video","delivery","partners","payouts","amo","access","settings"],
+    "Администратор":["dash","leads","cars","filters","video","delivery","partners","payouts","settings"],
+    "Менеджер":["dash","leads","cars","video","delivery","partners"],
+    "Наблюдатель":["dash","leads","partners"]
+  };
+  var CURROLE=null;
+  function allowed(v){ if(!CURROLE)return true; var p=PERMS[CURROLE]; return !p||p.indexOf(v)>-1; }
+  function tidyGroups(){ var nav=$('.side nav'); if(!nav)return; var k=Array.prototype.slice.call(nav.children); for(var i=0;i<k.length;i++){ if(k[i].className==='ng'){ var vis=false; for(var j=i+1;j<k.length;j++){ if(k[j].className==='ng')break; if(k[j].tagName==='A'&&k[j].style.display!=='none'){vis=true;break;} } k[i].style.display=vis?'':'none'; } } }
+  function applyPerms(){ $$('.side nav a[data-view]').forEach(function(a){ var v=a.getAttribute('data-view'); a.style.display=allowed(v)?'':'none'; }); tidyGroups(); var cur=document.querySelector('.view.on'); var cv=cur?cur.getAttribute('data-v'):null; if(cv&&!allowed(cv)){ var p=PERMS[CURROLE]||['dash']; go(p[0]||'dash'); } }
+  function genCode(){ var o=''; for(var i=0;i<6;i++){ o+=Math.floor(Math.random()*10); } return o; }
+  function pl(n,a,b,c){ var m=n%100; if(m>=11&&m<=14)return c; var d=n%10; return d===1?a:(d>=2&&d<=4?b:c); }
+  function initials(nm){ var w=(nm||'').trim().split(/\s+/); return ((w[0]||'').charAt(0)+(w[1]||'').charAt(0)).toUpperCase(); }
+  function accRow(a){ return '<tr><td><b>'+a.name+'</b></td>'
+    +'<td><span class="codepill">'+a.code+'<button data-access-copy="'+a.code+'" title="Копировать" aria-label="Копировать"><svg viewBox="0 0 24 24" width="14" height="14" fill="none"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 012-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></span></td>'
+    +'<td><span class="badge">'+a.role+'</span></td>'
+    +'<td class="r"><button class="btn btn-sm" data-access-revoke="'+a.code+'">Отозвать</button></td></tr>'; }
+  function renderAccess(){ var b=$('#accRows'); if(b)b.innerHTML=ACCESS.map(accRow).join(''); var c=$('#accCount'); if(c)c.textContent=ACCESS.length+' '+pl(ACCESS.length,'активный','активных','активных'); }
+  renderAccess();
+
+  // --- вход по коду доступа ---
+  var GKEY='pm_admin_ok';
+  function shortName(nm){ var w=(nm||'').trim().split(/\s+/); return w.length>=2?(w[1]+' '+w[0].charAt(0)+'.'):(w[0]||''); }
+  function setSideUser(a){ if(!a)return; var nm=$('#suName'),rl=$('#suRole'),av=$('#suAv'); if(nm)nm.textContent=shortName(a.name); if(rl)rl.textContent=a.role||''; if(av)av.textContent=initials(a.name); CURROLE=a.role||null; applyPerms(); }
+  function gateShow(){ var g=$('#gate'); if(!g)return; g.classList.remove('hide'); var er=$('#gateErr'); if(er)er.textContent=''; var i=$('#gateCode'); if(i){ i.value=''; setTimeout(function(){ try{i.focus();}catch(e){} },60); } }
+  function gateHide(){ var g=$('#gate'); if(g)g.classList.add('hide'); }
+  function gateTry(){ var i=$('#gateCode'),er=$('#gateErr'); if(!i)return; var c=(i.value||'').trim().toUpperCase(); if(!c){ return; }
+    var m=ACCESS.filter(function(a){return a.code.toUpperCase()===c;})[0];
+    if(m){ try{sessionStorage.setItem(GKEY,m.code);}catch(e){} setSideUser(m); gateHide(); }
+    else { if(er)er.textContent='Неверный код доступа'; var card=$('#gate .gate-card'); if(card){ card.classList.remove('gate-shake'); void card.offsetWidth; card.classList.add('gate-shake'); } i.select(); } }
+  (function(){ var saved=''; try{saved=sessionStorage.getItem(GKEY)||'';}catch(e){} var m=ACCESS.filter(function(a){return a.code===saved;})[0]; if(m){ setSideUser(m); gateHide(); } else { gateShow(); }
+    var gb=$('#gateBtn'); if(gb)gb.addEventListener('click',gateTry);
+    var gi=$('#gateCode'); if(gi)gi.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); gateTry(); } });
+    var lo=$('#logout'); if(lo)lo.addEventListener('click',function(){ try{sessionStorage.removeItem(GKEY);}catch(e){} gateShow(); }); })();
+  $('#carRows').innerHTML=cars.length?cars.map(carRow).join(''):'<tr><td colspan="7"><div class="empty"><div class="t">Автомобилей пока нет</div><div class="s">Нажмите «Добавить авто», чтобы создать первую карточку каталога.</div></div></td></tr>';
+
+  // --- filter chips ---
+  function chip(t){return '<span class="tagchip">'+t+' <button aria-label="Убрать" data-rm>×</button></span>';}
+  var DICT={ cntry:["🇨🇳 Китай","🇰🇷 Корея","🇯🇵 Япония","🇪🇺 Европа"], brand:["Toyota","BMW","Mercedes","Kia","Hyundai","Zeekr","Li","Haval"], body:["Внедорожник","Кроссовер","Седан","Лифтбек","Минивэн","Пикап"], blocks:["Электромобили","Премиум","Семейные"] };
+  function renderDict(key){ var el=$('#'+key); if(el) el.innerHTML=DICT[key].map(chip).join(''); }
+  function fillSelect(sel,arr,selected,lead){ if(!sel)return; var h=lead?('<option>'+lead+'</option>'):''; h+=arr.map(function(o){ return '<option'+(o===selected?' selected':'')+'>'+o+'</option>'; }).join(''); sel.innerHTML=h; }
+  function syncEditorDicts(country,body){ fillSelect($('#fCountry'),DICT.cntry,country); fillSelect($('#fBody'),DICT.body,body); var dl=$('#brandList'); if(dl)dl.innerHTML=DICT.brand.map(function(x){return '<option value="'+x+'">';}).join(''); }
+  function syncFilters(){ fillSelect($('#fltCountry'),DICT.cntry,null,'Страна: все'); }
+  function dictChanged(){ renderDict('cntry'); renderDict('brand'); renderDict('body'); syncFilters(); syncEditorDicts(); }
+  dictChanged();
+
+  // --- nav / views ---
+  var titles={dash:["Дашборд","Сводка по сайту и партнерской программе"],
+    leads:["Заявки","Все обращения с сайта, синхронизированы с amoCRM"],
+    cars:["Автомобили","Каталог, который видят клиенты на сайте"],
+    filters:["Категории и фильтры","Справочники фильтров каталога и витрин"],
+    video:["Видеообзоры","Раздел обзоров на сайте"],
+    delivery:["Выдачи","Общие фото выдач для страниц авто"],
+    partners:["Партнеры","Реферальная программа для физлиц и юрлиц"],
+    payouts:["Выплаты","Заявки на вывод из кабинетов партнеров"],
+    amo:["Интеграция amoCRM","Заявки, воронка и атрибуция сделок"],
+    access:["Доступы","Вход по коду и управление доступами команды"],
+    settings:["Настройки","Реквизиты, контакты и каналы"]};
+  function go(v){
+    if(CURROLE&&!allowed(v))return;
+    $$('.view').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-v')===v);});
+    $$('.side nav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-view')===v);});
+    if(titles[v]){ $('#pgTitle').textContent=titles[v][0]; }
+    $('#side').classList.remove('open');
+    var sq=document.querySelector('.tb-search input'); if(sq){ sq.value=''; } clearSearch();
+    window.scrollTo(0,0);
+  }
+  $$('.side nav a').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();go(a.getAttribute('data-view'));});});
+
+  // --- modals ---
+  function open(id){ $('#'+id).setAttribute('open',''); }
+  function close(m){ m.removeAttribute('open'); }
+
+  function pickImage(cb){ var i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.style.display='none'; document.body.appendChild(i); i.addEventListener('change',function(){ var f=i.files&&i.files[0]; if(f){ var r=new FileReader(); r.onload=function(){ cb(r.result); i.remove(); }; r.readAsDataURL(f); } else { i.remove(); } }); i.click(); }
+  var VIDEOS=[];
+  function lmTok(x){ var h=0; for(var i=0;i<x.length;i++){ h=(h*31+x.charCodeAt(i))>>>0; } var a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",o=''; for(var j=0;j<6;j++){ o+=a.charAt(h%a.length); h=(Math.floor(h/a.length)+(j+1)*13)>>>0; } return o; }
+  function toast(t){ var el=$('#toast'); el.textContent=t; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(function(){el.classList.remove('show');},1900); }
+
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    var go2=t.closest('[data-goto]'); if(go2){ go(go2.getAttribute('data-goto')==='partcond'?'partners':go2.getAttribute('data-goto')); if(go2.getAttribute('data-goto')==='partcond'){var pc=$('#partcond'); if(pc)pc.scrollIntoView({behavior:'smooth'});} return; }
+    if(t.closest('[data-car-new]')){ $('#carModalTitle').textContent='Новое авто'; $('#fBrand').value=''; syncEditorDicts(); open('carModal'); return; }
+    var ce=t.closest('[data-car-edit]'); if(ce){ $('#carModalTitle').textContent=ce.getAttribute('data-car-edit'); syncEditorDicts(); $('#fBrand').value=ce.getAttribute('data-car-edit').split(' ')[0]; open('carModal'); return; }
+    if(t.closest('[data-vid-new]')){ open('vidModal'); return; }
+    if(t.closest('[data-close]')){ var m=t.closest('.modal'); if(m)close(m); return; }
+    if(t.closest('[data-close-save]')){ var m2=t.closest('.modal'); if(m2)close(m2); toast('Опубликовано на сайт (демо)'); return; }
+    var ph=t.closest('[data-ph-add]'); if(ph){ pickImage(function(url){ var n=document.createElement('div'); n.className='ph'; n.style.cssText='background-image:url('+url+');background-size:cover;background-position:center'; n.innerHTML='<button class="x" data-ph-x aria-label="Удалить">×</button>'; ph.parentNode.insertBefore(n,ph); }); return; }
+    var phx=t.closest('[data-ph-x]'); if(phx){ phx.closest('.ph').remove(); return; }
+    var rm=t.closest('.tagchip button'); if(rm){ var ch=rm.closest('.tagchip'); var cont=ch.parentNode; var ckey=cont&&cont.id; var lab=(ch.textContent||'').replace('×','').trim(); if(ckey&&DICT[ckey]){ var ix=DICT[ckey].indexOf(lab); if(ix>-1)DICT[ckey].splice(ix,1); dictChanged(); } else { ch.remove(); } return; }
+    var ac=t.closest('[data-add-chip]'); if(ac){ var box=$('#'+ac.getAttribute('data-add-chip')); var ex=box.querySelector('.chip-input'); if(ex){ ex.querySelector('input').focus(); return; } var w=document.createElement('span'); w.className='tagchip chip-input'; w.innerHTML='<input type="text" placeholder="Название">'; box.appendChild(w); var inp=w.querySelector('input'); inp.focus(); var done=false; function commit(ok){ if(done)return; done=true; var v=inp.value.trim(); w.remove(); if(ok&&v){ var key=ac.getAttribute('data-add-chip'); if(DICT[key]&&DICT[key].indexOf(v)<0){ DICT[key].push(v); } dictChanged(); } } inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();commit(true);} else if(e.key==='Escape'){e.preventDefault();commit(false);} }); inp.addEventListener('blur',function(){ setTimeout(function(){commit(true);},120); }); return; }
+    var ba=t.closest('[data-block-add]'); if(ba){ var cont=ba.parentNode; if(cont.querySelector('.block-pick')||cont.querySelector('.block-newinput')) return;
+      var present=Array.prototype.map.call(cont.querySelectorAll('.tagchip'),function(c){return c.textContent.replace('\u00d7','').trim();});
+      var avail=DICT.blocks.filter(function(x){return present.indexOf(x)<0;});
+      var sel=document.createElement('select'); sel.className='block-pick';
+      sel.innerHTML='<option value="">Выбрать блок</option>'+avail.map(function(x){return '<option>'+x+'</option>';}).join('')+'<option value="__new">+ Новый блок</option>';
+      cont.insertBefore(sel,ba); sel.focus();
+      sel.addEventListener('change',function(){ var v=sel.value;
+        if(v==='__new'){ var inp=document.createElement('input'); inp.className='block-newinput'; inp.placeholder='Название блока'; cont.insertBefore(inp,ba); sel.remove(); inp.focus();
+          var done=false; function commit(ok){ if(done)return; done=true; var val=inp.value.trim(); inp.remove(); if(ok&&val){ if(DICT.blocks.indexOf(val)<0)DICT.blocks.push(val); ba.insertAdjacentHTML('beforebegin',chip(val)); } }
+          inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();commit(true);} else if(e.key==='Escape'){commit(false);} });
+          inp.addEventListener('blur',function(){ setTimeout(function(){commit(true);},120); });
+        } else if(v){ ba.insertAdjacentHTML('beforebegin',chip(v)); sel.remove(); } else { sel.remove(); } });
+      sel.addEventListener('blur',function(){ setTimeout(function(){ if(sel.parentNode&&sel.value===''){sel.remove();} },160); });
+      return; }
+    var cp=t.closest('[data-copy]'); if(cp){ var ce=document.querySelector(cp.getAttribute('data-copy')); var txt=ce?(ce.textContent||'').trim():''; try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt); } }catch(e){} toast('Скопировано: '+txt); return; }
+    var vfl=t.closest('[data-vid-file]'); if(vfl){ var vi=document.createElement('input'); vi.type='file'; vi.accept='video/*'; vi.style.display='none'; document.body.appendChild(vi); vi.addEventListener('change',function(){ var f=vi.files&&vi.files[0]; if(f){ vfl.innerHTML='<div style="text-align:center;color:var(--graphite);padding:6px"><svg viewBox="0 0 24 24" width="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><div style="font-size:10px;margin-top:4px;word-break:break-all">'+f.name+'</div></div>'; } vi.remove(); }); vi.click(); return; }
+    var ppk=t.closest('[data-ph-pick]'); if(ppk){ pickImage(function(url){ ppk.style.backgroundImage='url('+url+')'; ppk.style.backgroundSize='cover'; ppk.style.backgroundPosition='center'; ppk.innerHTML=''; }); return; }
+    var pag=t.closest('[data-ph-add-grid]'); if(pag){ var grid=document.getElementById(pag.getAttribute('data-ph-add-grid')); if(grid){ pickImage(function(url){ var n=document.createElement('div'); n.className='ph'; n.style.cssText='background-image:url('+url+');background-size:cover;background-position:center;aspect-ratio:4/3'; n.innerHTML='<button class="x" data-ph-x aria-label="Удалить">×</button>'; var add=grid.querySelector('.ph-add'); grid.insertBefore(n, add||null); }); } return; }
+    var ve=t.closest('[data-vid-edit]'); if(ve){ open('vidModal'); return; }
+    var vl=t.closest('[data-vid-link]'); if(vl){ var vc=document.getElementById('fVideos'); if(!vc||vc.querySelector('.block-pick'))return; var pr=Array.prototype.map.call(vc.querySelectorAll('.tagchip'),function(c){return c.textContent.replace('×','').trim();}); var av=VIDEOS.filter(function(x){return pr.indexOf(x)<0;}); if(!av.length){ toast('Все видео уже привязаны'); return; } var sv=document.createElement('select'); sv.className='block-pick'; sv.innerHTML='<option value="">Выбрать видео</option>'+av.map(function(x){return '<option>'+x+'</option>';}).join(''); vc.appendChild(sv); sv.focus(); sv.addEventListener('change',function(){ if(sv.value){ var tmp=document.createElement('span'); tmp.innerHTML=chip(sv.value); vc.insertBefore(tmp.firstChild, sv); } sv.remove(); }); sv.addEventListener('blur',function(){ setTimeout(function(){ if(sv.parentNode)sv.remove(); },160); }); return; }
+    var pdo=t.closest('[data-payout-do]'); if(pdo){ var pr2=pdo.closest('tr'); var bd=pr2.querySelector('.badge.o'); if(bd){ bd.className='badge g dot'; bd.textContent='выплачено'; } pdo.textContent='Проведено'; pdo.setAttribute('disabled',''); pdo.classList.remove('btn-red'); toast('Выплата проведена'); return; }
+    var exc=t.closest('[data-export-cars]'); if(exc){ var head=['Авто','Категория','Страна','Кузов','Состояние','Цена','Статус']; var rws=[head].concat(cars.map(function(c){ return [c[0],c[1],c[2],c[3],(c[4]==='new'?'Новое':'С пробегом'),c[5],(c[6]==='pub'?'опубликован':'черновик')]; })); var csv=rws.map(function(r){ return r.map(function(x){ return '"'+String(x).replace(/"/g,'""')+'"'; }).join(','); }).join('\n'); try{ var bl=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}); var a=document.createElement('a'); a.href=URL.createObjectURL(bl); a.download='prime-motors-auto.csv'; document.body.appendChild(a); a.click(); a.remove(); toast('CSV выгружен'); }catch(e){ toast('Не удалось выгрузить'); } return; }
+    var bed=t.closest('[data-block-edit]'); if(bed){ var row=bed.closest('tr'); var td0=row.querySelector('td'); var bb=td0.querySelector('b'); if(!bb||td0.querySelector('input'))return; var cur=bb.textContent; var ip=document.createElement('input'); ip.className='block-newinput'; ip.value=cur; td0.innerHTML=''; td0.appendChild(ip); ip.focus(); ip.select(); var dn=false; function fin(ok){ if(dn)return; dn=true; var vv=ip.value.trim(); td0.innerHTML='<b>'+((ok&&vv)?vv:cur)+'</b>'; } ip.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();fin(true);} else if(e.key==='Escape'){fin(false);} }); ip.addEventListener('blur',function(){ setTimeout(function(){fin(true);},120); }); return; }
+    var bra=t.closest('[data-block-row-add]'); if(bra){ var bt=document.getElementById('blocksTable'); var tb=bt&&bt.querySelector('tbody'); if(!tb||tb.querySelector('tr.newrow'))return; var tr=document.createElement('tr'); tr.className='newrow'; tr.innerHTML='<td><input class="block-newinput" placeholder="Название блока"></td><td class="muted">каталог, категория</td><td class="c">0</td><td class="c"><span class="badge g dot">да</span></td><td class="r"><button class="btn btn-sm" data-block-edit>Изменить</button></td>'; tb.appendChild(tr); var ip2=tr.querySelector('input'); ip2.focus(); var dn2=false; function fin2(ok){ if(dn2)return; dn2=true; var vv=ip2.value.trim(); if(ok&&vv){ tr.querySelector('td').innerHTML='<b>'+vv+'</b>'; tr.classList.remove('newrow'); if(DICT.blocks.indexOf(vv)<0)DICT.blocks.push(vv); } else { tr.remove(); } } ip2.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();fin2(true);} else if(e.key==='Escape'){fin2(false);} }); ip2.addEventListener('blur',function(){ setTimeout(function(){fin2(true);},120); }); return; }
+    var du=t.closest('[data-deliv-upload]'); if(du){ pickImage(function(url){ var g=document.getElementById('delivGrid'); if(!g)return; var f=document.createElement('figure'); f.className='dcard'; f.innerHTML='<div class="dimg" style="background-image:url('+url+')"><button class="x" data-dcard-x aria-label="Удалить">×</button></div><figcaption class="dfoot" data-dcard-edit title="Нажмите, чтобы переименовать">Новая выдача</figcaption>'; g.insertBefore(f, g.firstChild); }); return; }
+    var dx=t.closest('[data-dcard-x]'); if(dx){ var c=dx.closest('.dcard'); if(c)c.remove(); return; }
+    var dde=t.closest('[data-dcard-edit]'); if(dde){ if(dde.querySelector('input'))return; var cur=dde.textContent.trim(); var ip=document.createElement('input'); ip.value=cur; dde.textContent=''; dde.appendChild(ip); ip.focus(); ip.select(); var dn=false; function fin(ok){ if(dn)return; dn=true; var v=ip.value.trim(); dde.textContent=(ok&&v)?v:cur; } ip.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();fin(true);} else if(e.key==='Escape'){fin(false);} }); ip.addEventListener('blur',function(){ setTimeout(function(){fin(true);},120); }); return; }
+    var lo=t.closest('[data-lead-open]'); if(lo){ var tr=lo.closest('tr'); var td=tr.children; document.getElementById('lmName').textContent=td[0].textContent; document.getElementById('lmPhone').textContent=td[1].textContent.trim(); var sb=td[2].querySelector('.badge'); var se=document.getElementById('lmSource'); se.textContent=sb?sb.textContent:''; se.className='badge'; var stb=td[6].querySelector('.badge'); var ste=document.getElementById('lmStage'); ste.textContent=stb.textContent.trim(); ste.className=stb.className; document.getElementById('lmTime').textContent=td[5].textContent.trim(); document.getElementById('lmCar').textContent=td[3].textContent.trim(); document.getElementById('lmPartner').textContent=td[4].textContent.trim(); document.getElementById('lmTrack').textContent='primemotors.ru/track/'+lmTok(td[0].textContent+'|'+td[1].textContent); open('leadModal'); return; }
+    var exl=t.closest('[data-export-leads]'); if(exl){ var hd=['Клиент','Телефон','Источник','Авто','Партнер','Время','Этап']; var rr=[hd].concat(LEADS.map(function(l){return [l[0],l[1],l[2],l[3],l[4],l[5],l[6]];})); var cs=rr.map(function(r){return r.map(function(x){return '"'+String(x).replace(/"/g,'""')+'"';}).join(',');}).join('\n'); try{ var bl=new Blob(['\ufeff'+cs],{type:'text/csv;charset=utf-8'}); var aa=document.createElement('a'); aa.href=URL.createObjectURL(bl); aa.download='prime-motors-zayavki.csv'; document.body.appendChild(aa); aa.click(); aa.remove(); toast('CSV выгружен'); }catch(e){ toast('Не удалось выгрузить'); } return; }
+    var tt=t.closest('[data-toast]'); if(tt){ toast(tt.getAttribute('data-toast')); return; }
+    // seg toggles (visual)
+    var po=t.closest('[data-part-open]'); if(po){ var tr=po.closest('tr'); var td=tr.children; document.getElementById('pmName').textContent=tr.querySelector('td b').textContent; var tb=td[1].querySelector('.badge'); var pe=document.getElementById('pmType'); pe.textContent=tb.textContent; pe.className=tb.className; var sbd=td[6].querySelector('.badge'); var se=document.getElementById('pmStatus'); se.textContent=sbd.textContent.trim(); se.className=sbd.className; var sub=tr.querySelector('.s.muted'); document.getElementById('pmSub').textContent=sub?sub.textContent:''; document.getElementById('pmLinkText').textContent=td[2].textContent.trim(); document.getElementById('pmLeads').textContent=td[3].textContent.trim(); document.getElementById('pmDeals').textContent=td[4].textContent.trim(); document.getElementById('pmAccr').textContent=td[5].textContent.trim(); open('partModal'); return; }
+    var sb=t.closest('.seg button'); if(sb){ $$('.seg button',sb.parentNode).forEach(function(b){b.classList.remove('on');}); sb.classList.add('on'); var pf=sb.getAttribute('data-pf'); if(pf){ $$('tr[data-ptype]').forEach(function(r){ var ok=pf==='all'?true:(pf==='check'?r.getAttribute('data-status')==='check':r.getAttribute('data-ptype')===pf); r.style.display=ok?'':'none'; }); } var cf=sb.getAttribute('data-cf'); if(cf){ $$('#carRows tr').forEach(function(r){ var ok=cf==='all'?true:(cf==='draft'?r.getAttribute('data-pub')==='draft':r.getAttribute('data-cond')===cf); r.style.display=ok?'':'none'; }); } var vf=sb.getAttribute('data-vf'); if(vf){ $$('.rcard').forEach(function(r){ var ok=vf==='all'?true:(vf==='draft'?r.getAttribute('data-pub')==='draft':r.getAttribute('data-tag')===vf); r.style.display=ok?'':'none'; }); } var lf=sb.getAttribute('data-lf'); if(lf){ $$('#leadRows tr').forEach(function(r){ var ok=lf==='all'?true:r.getAttribute('data-g')===lf; r.style.display=ok?'':'none'; }); } return; }
+    var llk=t.closest('[data-lead-link]'); if(llk){ var u=llk.getAttribute('data-lead-link'); try{ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u); }catch(e){} toast('Ссылка для клиента скопирована'); return; }
+    if(t.closest('[data-access-add]')){ var ac=$('#accAddCard'); if(ac){ ac.hidden=false; $('#accName').value=''; $('#accCode').value=genCode(); $('#accRole').value='Менеджер'; ac.scrollIntoView({behavior:'smooth',block:'nearest'}); setTimeout(function(){ try{$('#accName').focus();}catch(e){} },80); } return; }
+    if(t.closest('[data-access-gen]')){ var cc=$('#accCode'); if(cc)cc.value=genCode(); return; }
+    if(t.closest('[data-access-cancel]')){ var ac2=$('#accAddCard'); if(ac2)ac2.hidden=true; return; }
+    if(t.closest('[data-access-save]')){ var nm=($('#accName').value||'').trim(); if(!nm){ toast('Укажите ФИО'); $('#accName').focus(); return; } var cd=($('#accCode').value||'').trim()||genCode(); ACCESS.push({name:nm,code:cd,role:$('#accRole').value}); renderAccess(); $('#accAddCard').hidden=true; toast('Доступ выдан: '+cd); return; }
+    var acp=t.closest('[data-access-copy]'); if(acp){ var code=acp.getAttribute('data-access-copy'); try{ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(code); }catch(e){} toast('Код скопирован: '+code); return; }
+    var acr=t.closest('[data-access-revoke]'); if(acr){ var code=acr.getAttribute('data-access-revoke'); ACCESS=ACCESS.filter(function(a){return a.code!==code;}); renderAccess(); toast('Доступ отозван'); return; }
+    var fb=t.closest('button.btn:not([disabled])'); if(fb){ toast('Готово (демо)'); return; }
+  });
+
+  $('#burger').addEventListener('click',function(){ $('#side').classList.toggle('open'); });
+  var _sc=$('#sideScrim'); if(_sc)_sc.addEventListener('click',function(){ $('#side').classList.remove('open'); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ $$('.modal[open]').forEach(close); } });
+  /* ===== Умный поиск: раскладка RU/EN + транслитерация + словарь марок ===== */
+  var EN="qwertyuiop[]asdfghjkl;'zxcvbnm,./";
+  var RU="йцукенгшщзхъфывапролджэячсмитьбю.";
+  function en2ru(x){ var o=''; for(var i=0;i<x.length;i++){ var p=EN.indexOf(x[i]); o+=(p>-1?RU[p]:x[i]); } return o; }
+  function ru2en(x){ var o=''; for(var i=0;i<x.length;i++){ var p=RU.indexOf(x[i]); o+=(p>-1?EN[p]:x[i]); } return o; }
+  var L2R=[['shch','щ'],['sch','щ'],['sh','ш'],['ch','ч'],['zh','ж'],['kh','х'],['ts','ц'],['ya','я'],['yu','ю'],['yo','е'],['ye','е'],['ee','и'],['oo','у'],['ph','ф'],['ck','к'],['j','дж'],['x','кс'],['w','в'],['y','и'],['a','а'],['b','б'],['c','к'],['d','д'],['e','е'],['f','ф'],['g','г'],['h','х'],['i','и'],['k','к'],['l','л'],['m','м'],['n','н'],['o','о'],['p','п'],['q','к'],['r','р'],['s','с'],['t','т'],['u','у'],['v','в'],['z','з']];
+  var R2L=[['я','ya'],['ю','yu'],['ж','zh'],['ш','sh'],['щ','sch'],['ч','ch'],['ц','ts'],['х','h'],['э','e'],['а','a'],['б','b'],['в','v'],['г','g'],['д','d'],['е','e'],['з','z'],['и','i'],['й','y'],['к','k'],['л','l'],['м','m'],['н','n'],['о','o'],['п','p'],['р','r'],['с','s'],['т','t'],['у','u'],['ф','f'],['ы','y'],['ь',''],['ъ','']];
+  function latToRu(x){ x=(x||'').toLowerCase(); for(var i=0;i<L2R.length;i++){ x=x.split(L2R[i][0]).join(L2R[i][1]); } return x; }
+  function ruToLat(x){ x=(x||'').toLowerCase(); for(var i=0;i<R2L.length;i++){ x=x.split(R2L[i][0]).join(R2L[i][1]); } return x; }
+  var ALIAS=[["toyota",["тойота"]],["bmw",["бмв"]],["mercedes",["мерседес","мерс"]],["kia",["киа","кия"]],["hyundai",["хендай","хундай","хундаи"]],["zeekr",["зикр","зеекр"]],["lixiang",["лисян","лисянг","ликсианг","ли сян"]],["li l7",["лисян","ли л7","лисян л7"]],["li l6",["ли л6","лисян л6"]],["haval",["хавал","хавейл"]],["volkswagen",["фольксваген","вольксваген"]],["camry",["камри"]],["sorento",["соренто"]],["palisade",["палисад","пэлисейд"]],["rav4",["рав4","рав 4"]],["land cruiser",["ленд крузер","ландкрузер","крузер"]],["tiguan",["тигуан"]],["alphard",["альфард"]],["sportage",["спортейдж","спортаж"]],["sorento",["соренто"]],["zeekr 001",["зикр 001"]]];
+  function variants(q){ q=(q||'').toLowerCase().trim(); var set=[]; function add(v){ if(v&&set.indexOf(v)<0)set.push(v); } add(q); add(en2ru(q)); add(ru2en(q)); add(ruToLat(q)); add(latToRu(q));
+    for(var i=0;i<ALIAS.length;i++){ var k=ALIAS[i][0], vs=ALIAS[i][1], hit=q.indexOf(k)>-1; for(var j=0;j<vs.length;j++){ if(q.indexOf(vs[j])>-1)hit=true; } if(hit){ add(k); for(var j2=0;j2<vs.length;j2++)add(vs[j2]); } }
+    return set; }
+  function targetForms(t){ t=(t||'').toLowerCase(); return [t, ruToLat(t), latToRu(t)]; }
+  function searchItems(view){ return view.querySelectorAll('table tbody tr, .rcard, .tagchip:not(.chip-input), .dph, .logline, .maprow'); }
+  function clearSearch(){ var v=document.querySelector('.view.on'); if(!v)return; searchItems(v).forEach(function(el){ el.style.display=''; }); }
+  function runSearch(){
+    var box=document.querySelector('.tb-search input'); if(!box)return;
+    var v=document.querySelector('.view.on'); if(!v)return;
+    var q=(box.value||'').trim();
+    var items=searchItems(v);
+    if(!q){ items.forEach(function(el){el.style.display='';}); return; }
+    var qs=variants(q);
+    items.forEach(function(el){ var plain=(el.textContent||'').toLowerCase(); var tr1=ruToLat(plain), tr2=latToRu(plain); var ok=qs.some(function(w){ if(!w)return false; if(plain.indexOf(w)!==-1)return true; if(w.length>=3 && (tr1.indexOf(w)!==-1||tr2.indexOf(w)!==-1))return true; return false; }); el.style.display=ok?'':'none'; });
+  }
+  (function(){ var box=document.querySelector('.tb-search input'); if(box){ box.addEventListener('input',runSearch); box.addEventListener('keydown',function(e){ if(e.key==='Escape'){ box.value=''; runSearch(); box.blur(); } }); } })();
+})();
+</script>
+</body>
+</html>
